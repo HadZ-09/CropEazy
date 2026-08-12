@@ -11,8 +11,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN git lfs install 2>/dev/null || true \
-    && git lfs pull 2>/dev/null || true
+RUN python -m backend.model_download
 
 ENV PORT=8000
 EXPOSE 8000

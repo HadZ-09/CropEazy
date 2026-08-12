@@ -8,7 +8,7 @@ Full-stack crop recommendation, yield prediction, pest alerts, OTP login, and pr
 
 Repo: https://github.com/HadZ-09/CropEazy
 
-ML models are stored with **Git LFS**. After cloning, run `git lfs pull` locally. Railway runs `git lfs pull` during build (see `railway.toml` / `nixpacks.toml`).
+ML models are stored with **Git LFS** on GitHub. **Railway does not pull LFS files**, so the build runs `python -m backend.model_download` to fetch models from GitHub instead.
 
 ### 2. Create the Railway project
 
@@ -51,7 +51,7 @@ Visit `https://YOUR-DOMAIN.up.railway.app/health`. You should see:
 }
 ```
 
-If `yield_model_bytes` is ~130 (not ~108000000), Git LFS did not pull — check build logs for `git lfs pull`.
+If `yield_model_bytes` is ~130, models failed to download — check build logs for `python -m backend.model_download`.
 
 ## Local development
 

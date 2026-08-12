@@ -11,7 +11,7 @@ from fastapi.staticfiles import StaticFiles
 from joblib import load
 from pydantic import BaseModel, Field
 
-from backend.alert_service import check_and_notify_user
+# from backend.alert_service import check_and_notify_user
 from backend.auth import get_current_user, send_login_otp, verify_login_otp
 from backend.database import (
     add_dashboard_record,
@@ -22,6 +22,7 @@ from backend.database import (
     upsert_alert_subscription,
 )
 from backend.location_service import get_location_context
+from backend.model_download import ensure_model_files
 from backend.pest_data import get_pest_prediction
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -73,6 +74,8 @@ def load_models() -> None:
     if yield_model is not None and crop_model is not None:
         return
 
+    ensure_model_files()
+
     if not YIELD_MODEL_PATH.exists():
         raise RuntimeError(
             f"Yield model not found at {YIELD_MODEL_PATH}. "
@@ -122,10 +125,10 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(
-    title="CropEazy Intelligence API",
-    # description="Crop recommendation, yield prediction, pest alerts, and farmer dashboard.",
-    version="3.0.0",
-    lifespan=lifespan,
+    # title="CropEazy Intelligence API",
+    # # description="Crop recommendation, yield prediction, pest alerts, and farmer dashboard.",
+    # version="3.0.0",
+    # lifespan=lifespan,
 )
 
 app.add_middleware(

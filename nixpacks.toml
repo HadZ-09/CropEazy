@@ -5,7 +5,7 @@ nixPkgs = ["python311", "git", "git-lfs"]
 cmds = ["pip install -r requirements.txt"]
 
 [phases.build]
-cmds = ["git lfs install", "git lfs pull"]
+cmds = ["python -m backend.model_download"]
 
 [start]
 cmd = "uvicorn backend.main:app --host 0.0.0.0 --port $PORT"
