@@ -358,7 +358,7 @@ async function fetchLocationContext(latitude, longitude, forceRefresh = false) {
         const place = [data.city, data.region, data.country].filter(Boolean).join(", ");
         label.textContent = place || "Location detected (enter climate values if fields are empty)";
         if (!hasWeatherData(data)) {
-            showError("Weather data unavailable — add OPENWEATHER_API_KEY on Render, or enter temp, humidity, and rainfall manually.");
+            showError(data.weather_hint || "Weather data unavailable — enter temp, humidity, and rainfall manually.");
         }
     } catch (error) {
         label.textContent = "Could not load location details.";

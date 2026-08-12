@@ -73,6 +73,7 @@ ISO_COUNTRY_NAMES: Dict[str, str] = {
 
 def _openweather_key() -> Optional[str]:
     key = (os.getenv("OPENWEATHER_API_KEY") or os.getenv("OWM_API_KEY") or "").strip()
+    key = key.strip('"').strip("'")
     return key or None
 
 
@@ -100,7 +101,12 @@ def _fetch_json_safe(url: str) -> Optional[Any]:
     try:
         return _fetch_json(url)
     except urllib.error.HTTPError as exc:
-        print(f"Location API HTTP {exc.code}: {url[:100]}")
+        body = ""
+        try:
+            body = exc.read().decode()[:200]
+        except Exception:
+            pass
+        print(f"Location API HTTP {exc.code}: {url[:100]} — {body}")
         return None
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
         print(f"Location API error: {exc} — {url[:100]}")
@@ -364,13 +370,48 @@ def _fetch_weather_open_meteo(latitude: float, longitude: float) -> Dict[str, An
     }
 
 
+def _fetch_weather_archive_fallback(latitude: float, longitude: float) -> Optional[Dict[str, Any]]:
+    annual_rainfall, avg_temp, avg_humidity = _fetch_rainfall_open_meteo(latitude, longitude)
+    if avg_temp is None and avg_humidity is None and annual_rainfall is None:
+        return None
+
+    return {
+        "temperature": avg_temp,
+        "humidity": avg_humidity,
+        "avg_temp": avg_temp,
+        "annual_rainfall_mm": annual_rainfall,
+        "monthly_rainfall_mm": round(annual_rainfall / 12, 1) if annual_rainfall else None,
+        "year": date.today().year,
+        "weather_provider": "open-meteo-archive",
+    }
+
+
 def _fetch_weather(latitude: float, longitude: float) -> Dict[str, Any]:
     if _openweather_key():
         weather = _fetch_weather_openweather(latitude, longitude)
         if weather:
             return weather
 
-    return _fetch_weather_open_meteo(latitude, longitude)
+    weather = _fetch_weather_open_meteo(latitude, longitude)
+    if weather.get("weather_provider") != "none":
+        return weather
+
+    archive = _fetch_weather_archive_fallback(latitude, longitude)
+    return archive if archive else weather
+
+
+def _weather_hint() -> str:
+    if not _openweather_key():
+        return (
+            "OPENWEATHER_API_KEY is not set on Render. "
+            "Add it under Environment → Save → redeploy. "
+            "Get a free key at openweathermap.org/api"
+        )
+    return (
+        "OPENWEATHER_API_KEY is set but weather fetch failed. "
+        "New keys take up to 2 hours to activate. "
+        "Check the key at openweathermap.org/api_keys"
+    )
 
 
 def get_location_context(
@@ -396,8 +437,12 @@ def get_location_context(
         "region": place.get("region", ""),
         "city": place.get("city", ""),
         "matched_area": matched_area,
+        "openweather_configured": bool(_openweather_key()),
         **weather,
     }
+    if weather.get("weather_provider") == "none":
+        result["weather_hint"] = _weather_hint()
 
-    _location_cache[key] = (time.time(), result)
+    if weather.get("weather_provider") != "none":
+        _location_cache[key] = (time.time(), result)
     return result
