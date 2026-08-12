@@ -1,6 +1,20 @@
 ﻿# CropEazy — Crop Intelligence Platform
 
-Full-stack crop recommendation, yield prediction, pest alerts, OTP login, and profit/loss dashboard. Frontend and API run together on one Railway service.
+Full-stack crop recommendation, yield prediction, pest alerts, OTP login, and profit/loss dashboard. Frontend and API run together on one service.
+
+## Deploy on Render (recommended alternative to Vercel)
+
+1. Go to [render.com](https://render.com) and sign in with GitHub.
+2. **New** → **Blueprint** → connect repo **HadZ-09/CropEazy**.
+3. Render reads `render.yaml` automatically (downloads models at build, starts uvicorn, `/health` check).
+4. Use at least the **Starter** plan (512MB+ RAM needed for sklearn + 108MB model).
+5. After deploy, open your `*.onrender.com` URL.
+
+Verify: `https://YOUR-APP.onrender.com/health` → `yield_model_loaded: true`.
+
+Optional env vars in the Render dashboard: `JWT_SECRET` (auto-generated), Twilio keys for SMS.
+
+---
 
 ## Deploy on Railway
 
