@@ -325,10 +325,7 @@ def location_context(
     latitude: float = Query(..., ge=-90, le=90),
     longitude: float = Query(..., ge=-180, le=180),
 ) -> Dict[str, Any]:
-    try:
-        return get_location_context(latitude, longitude, yield_options.get("areas", []))
-    except Exception as exc:
-        raise HTTPException(status_code=502, detail=f"Could not fetch location data: {exc}") from exc
+    return get_location_context(latitude, longitude, yield_options.get("areas", []))
 
 
 def estimate_crop_price_inr(crop_name: str) -> float:

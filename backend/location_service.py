@@ -1,4 +1,5 @@
 import json
+import os
 import time
 import urllib.error
 import urllib.parse
@@ -8,7 +9,7 @@ from difflib import get_close_matches
 from typing import Any, Dict, List, Optional, Tuple
 
 USER_AGENT = "CropEazy/1.0 (https://github.com/HadZ-09/CropEazy)"
-CACHE_TTL_SECONDS = 3600
+CACHE_TTL_SECONDS = 86400  # 24 hours — reduces repeat calls from Render's shared IP
 _location_cache: Dict[str, Tuple[float, Dict[str, Any]]] = {}
 
 
@@ -21,7 +22,7 @@ def _fetch_json(url: str, headers: Optional[Dict[str, str]] = None) -> Dict[str,
         url,
         headers=headers or {"User-Agent": USER_AGENT},
     )
-    with urllib.request.urlopen(request, timeout=15) as response:
+    with urllib.request.urlopen(request, timeout=20) as response:
         return json.loads(response.read().decode())
 
 
@@ -29,10 +30,10 @@ def _fetch_json_safe(url: str) -> Optional[Dict[str, Any]]:
     try:
         return _fetch_json(url)
     except urllib.error.HTTPError as exc:
-        if exc.code == 429:
-            return None
-        raise
-    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError):
+        print(f"Location API HTTP {exc.code}: {url[:100]}")
+        return None
+    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
+        print(f"Location API error: {exc} — {url[:100]}")
         return None
 
 
@@ -99,7 +100,11 @@ def _reverse_geocode_bigdatacloud(latitude: float, longitude: float) -> Optional
     if not place:
         return None
 
-    city = place.get("city") or place.get("locality") or place.get("localityInfo", {}).get("administrative", [{}])[0].get("name", "")
+    city = (
+        place.get("city")
+        or place.get("locality")
+        or (place.get("localityInfo", {}).get("administrative") or [{}])[0].get("name", "")
+    )
     return {
         "display_name": ", ".join(
             part
@@ -113,19 +118,38 @@ def _reverse_geocode_bigdatacloud(latitude: float, longitude: float) -> Optional
 
 
 def _reverse_geocode(latitude: float, longitude: float) -> Dict[str, Any]:
-    place = _reverse_geocode_nominatim(latitude, longitude)
-    if place:
-        return place
+    # Cloud hosts share one outbound IP — Nominatim blocks them quickly.
+    # Prefer BigDataCloud on Render/Railway; use Nominatim only locally.
+    on_cloud = bool(
+        os.getenv("RENDER") or os.getenv("RAILWAY_ENVIRONMENT") or os.getenv("VERCEL")
+    )
 
-    place = _reverse_geocode_bigdatacloud(latitude, longitude)
-    if place:
-        return place
+    if on_cloud:
+        providers = (_reverse_geocode_bigdatacloud, _reverse_geocode_nominatim)
+    else:
+        providers = (_reverse_geocode_nominatim, _reverse_geocode_bigdatacloud)
+
+    for provider in providers:
+        place = provider(latitude, longitude)
+        if place and (place.get("country") or place.get("city")):
+            return place
 
     return {
         "display_name": f"{latitude:.4f}, {longitude:.4f}",
-        "country": "",
+        "country": "India",
         "region": "",
         "city": "",
+    }
+
+
+def _empty_weather() -> Dict[str, Any]:
+    return {
+        "temperature": None,
+        "humidity": None,
+        "avg_temp": None,
+        "annual_rainfall_mm": None,
+        "monthly_rainfall_mm": None,
+        "year": date.today().year,
     }
 
 
@@ -144,9 +168,11 @@ def _fetch_weather(latitude: float, longitude: float) -> Dict[str, Any]:
             }
         )
     )
-    weather = _fetch_json(weather_url)
-    current = weather.get("current", {})
+    weather = _fetch_json_safe(weather_url)
+    if not weather:
+        return _empty_weather()
 
+    current = weather.get("current", {})
     annual_rainfall = None
     avg_temp = None
     avg_humidity = None

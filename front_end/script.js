@@ -336,7 +336,11 @@ async function fetchLocationContext(latitude, longitude) {
             JSON.stringify({ key: cacheKey, data })
         );
         applyLocationContext(data);
-        label.textContent = `${data.city ? `${data.city}, ` : ""}${data.region ? `${data.region}, ` : ""}${data.country}`;
+        const place = [data.city, data.region, data.country].filter(Boolean).join(", ");
+        label.textContent = place || "Location detected (enter climate values if fields are empty)";
+        if (data.temperature === null && data.humidity === null) {
+            showError("Weather API was busy — city/region filled if available. Enter temp, humidity, and rainfall manually.");
+        }
     } catch (error) {
         label.textContent = "Could not load location details.";
         showError(error.message);
