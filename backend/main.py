@@ -137,8 +137,6 @@ app.add_middleware(
 )
 
 FRONTEND_DIR = PROJECT_ROOT / "front_end"
-if FRONTEND_DIR.exists():
-    app.mount("/", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="frontend")
 
 
 class SendOtpRequest(BaseModel):
@@ -460,3 +458,7 @@ def predict_yield(payload: YieldPredictionRequest) -> YieldPredictionResponse:
         )
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Yield prediction failed: {exc}") from exc
+
+
+if FRONTEND_DIR.exists():
+    app.mount("/", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="frontend")
