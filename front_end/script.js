@@ -16,6 +16,7 @@ async function parseJsonResponse(response) {
 const AUTH_TOKEN_KEY = "cropeazy_auth_token";
 const AUTH_USER_KEY = "cropeazy_auth_user";
 const LOCATION_PROMPT_KEY = "cropeazy_location_prompt_seen";
+const LOCATION_CACHE_KEY = "cropeazy_location_cache";
 
 let currentMode = "crop";
 let cropPrices = {};
