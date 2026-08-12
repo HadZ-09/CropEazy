@@ -258,10 +258,25 @@ def read_root() -> Dict[str, str]:
 @app.get("/health")
 def health_check() -> Dict[str, Any]:
     yield_path, crop_path = current_model_paths()
+    models_on_disk = (
+        yield_path.exists()
+        and crop_path.exists()
+        and yield_path.stat().st_size > 1000
+        and crop_path.stat().st_size > 1000
+    )
     return {
         "status": "ok",
         "yield_model_loaded": yield_model is not None,
         "crop_model_loaded": crop_model is not None,
+        "models_on_disk": models_on_disk,
+        "lazy_load": not _should_preload_models(),
+        "message": (
+            "Models load on first prediction (normal on Render free tier)."
+            if not _should_preload_models() and not yield_model
+            else "Models are loaded in memory."
+            if yield_model and crop_model
+            else "Waiting for first prediction to load models."
+        ),
         "yield_model_path": str(yield_path),
         "yield_model_exists": yield_path.exists(),
         "yield_model_bytes": yield_path.stat().st_size if yield_path.exists() else 0,
