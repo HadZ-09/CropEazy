@@ -276,7 +276,10 @@ function acceptLocationAccess() {
     requestLocationAccess();
 }
 
-function requestLocationAccess() {
+function requestLocationAccess(clearCache = false) {
+    if (clearCache) {
+        sessionStorage.removeItem(LOCATION_CACHE_KEY);
+    }
     if (!navigator.geolocation) {
         showError("GPS is not supported in this browser.");
         return;
@@ -288,7 +291,7 @@ function requestLocationAccess() {
                 latitude: position.coords.latitude,
                 longitude: position.coords.longitude,
             };
-            fetchLocationContext(lastKnownCoords.latitude, lastKnownCoords.longitude);
+            fetchLocationContext(lastKnownCoords.latitude, lastKnownCoords.longitude, clearCache);
         },
         (error) => {
             let message = "Could not access your location.";
@@ -301,26 +304,40 @@ function requestLocationAccess() {
     );
 }
 
-async function fetchLocationContext(latitude, longitude) {
+function hasWeatherData(data) {
+    return data && (
+        data.temperature != null ||
+        data.humidity != null ||
+        data.annual_rainfall_mm != null ||
+        data.monthly_rainfall_mm != null
+    );
+}
+
+async function fetchLocationContext(latitude, longitude, forceRefresh = false) {
     const status = document.getElementById("location-status");
     const label = document.getElementById("location-label");
     status.classList.remove("hidden");
     label.textContent = "Fetching weather and region data...";
 
     const cacheKey = `${latitude.toFixed(3)},${longitude.toFixed(3)}`;
-    const cachedRaw = sessionStorage.getItem(LOCATION_CACHE_KEY);
-    if (cachedRaw) {
-        try {
-            const cached = JSON.parse(cachedRaw);
-            if (cached.key === cacheKey && cached.data) {
-                locationContext = cached.data;
-                applyLocationContext(cached.data);
-                label.textContent = `${cached.data.city ? `${cached.data.city}, ` : ""}${cached.data.region ? `${cached.data.region}, ` : ""}${cached.data.country}`;
-                return;
+    if (!forceRefresh) {
+        const cachedRaw = sessionStorage.getItem(LOCATION_CACHE_KEY);
+        if (cachedRaw) {
+            try {
+                const cached = JSON.parse(cachedRaw);
+                if (cached.key === cacheKey && cached.data && hasWeatherData(cached.data)) {
+                    locationContext = cached.data;
+                    applyLocationContext(cached.data);
+                    const place = [cached.data.city, cached.data.region, cached.data.country].filter(Boolean).join(", ");
+                    label.textContent = place || "Location detected";
+                    return;
+                }
+            } catch {
+                sessionStorage.removeItem(LOCATION_CACHE_KEY);
             }
-        } catch {
-            sessionStorage.removeItem(LOCATION_CACHE_KEY);
         }
+    } else {
+        sessionStorage.removeItem(LOCATION_CACHE_KEY);
     }
 
     try {
@@ -331,15 +348,17 @@ async function fetchLocationContext(latitude, longitude) {
         if (!response.ok) throw new Error(data.detail || "Location lookup failed.");
 
         locationContext = data;
-        sessionStorage.setItem(
-            LOCATION_CACHE_KEY,
-            JSON.stringify({ key: cacheKey, data })
-        );
+        if (hasWeatherData(data)) {
+            sessionStorage.setItem(
+                LOCATION_CACHE_KEY,
+                JSON.stringify({ key: cacheKey, data })
+            );
+        }
         applyLocationContext(data);
         const place = [data.city, data.region, data.country].filter(Boolean).join(", ");
         label.textContent = place || "Location detected (enter climate values if fields are empty)";
-        if (data.temperature === null && data.humidity === null) {
-            showError("Weather API was busy — city/region filled if available. Enter temp, humidity, and rainfall manually.");
+        if (!hasWeatherData(data)) {
+            showError("Weather data unavailable — add OPENWEATHER_API_KEY on Render, or enter temp, humidity, and rainfall manually.");
         }
     } catch (error) {
         label.textContent = "Could not load location details.";
@@ -348,13 +367,17 @@ async function fetchLocationContext(latitude, longitude) {
 }
 
 function applyLocationContext(data) {
-    if (data.temperature !== null) {
+    if (data.temperature != null) {
         setInputValue("crop-temperature", data.temperature);
         setInputValue("yield-temp", data.avg_temp ?? data.temperature);
     }
-    if (data.humidity !== null) setInputValue("crop-humidity", data.humidity);
-    if (data.annual_rainfall_mm !== null) setInputValue("yield-rainfall", data.annual_rainfall_mm);
-    if (data.monthly_rainfall_mm !== null) setInputValue("crop-rainfall", data.monthly_rainfall_mm);
+    if (data.humidity != null) setInputValue("crop-humidity", data.humidity);
+    if (data.annual_rainfall_mm != null) setInputValue("yield-rainfall", data.annual_rainfall_mm);
+    if (data.monthly_rainfall_mm != null) {
+        setInputValue("crop-rainfall", data.monthly_rainfall_mm);
+    } else if (data.annual_rainfall_mm != null) {
+        setInputValue("crop-rainfall", Math.round(data.annual_rainfall_mm / 12));
+    }
     if (data.matched_area) setInputValue("yield-area", data.matched_area);
     if (data.year) setInputValue("yield-year", data.year);
 }

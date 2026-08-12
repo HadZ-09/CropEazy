@@ -261,7 +261,8 @@ def _empty_weather() -> Dict[str, Any]:
 
 
 def _fetch_rainfall_open_meteo(latitude: float, longitude: float) -> Tuple[Optional[float], Optional[float], Optional[float]]:
-    end_date = date.today()
+    # Archive API lags ~5 days — requesting "today" returns HTTP 400.
+    end_date = date.today() - timedelta(days=5)
     start_date = end_date - timedelta(days=365)
     archive_url = (
         "https://archive-api.open-meteo.com/v1/archive?"
