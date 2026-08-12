@@ -70,13 +70,25 @@ CROP_PRICES_INR_PER_TONNE: Dict[str, float] = {
 def load_models() -> None:
     global yield_model, crop_model, yield_options
 
+    if yield_model is not None and crop_model is not None:
+        return
+
     if not YIELD_MODEL_PATH.exists():
         raise RuntimeError(
-            f"Yield model not found at {YIELD_MODEL_PATH}. Run backend/training.py first."
+            f"Yield model not found at {YIELD_MODEL_PATH}. "
+            "Ensure Git LFS files are pulled during deploy."
         )
     if not CROP_MODEL_PATH.exists():
         raise RuntimeError(
-            f"Crop model not found at {CROP_MODEL_PATH}. Run backend/train_crop_model.py first."
+            f"Crop model not found at {CROP_MODEL_PATH}. "
+            "Ensure Git LFS files are pulled during deploy."
+        )
+
+    # Reject Git LFS pointer stubs (deployed without `git lfs pull`)
+    if YIELD_MODEL_PATH.stat().st_size < 1000:
+        raise RuntimeError(
+            "Yield model file looks like a Git LFS pointer, not the real model. "
+            "Run `git lfs pull` before deploy."
         )
 
     yield_model = load(YIELD_MODEL_PATH)
@@ -90,12 +102,22 @@ def load_models() -> None:
         }
 
 
+def ensure_models_loaded() -> None:
+    try:
+        load_models()
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     init_db()
-    load_models()
-    print(f"Loaded yield model from {YIELD_MODEL_PATH}")
-    print(f"Loaded crop model from {CROP_MODEL_PATH}")
+    try:
+        load_models()
+        print(f"Loaded yield model from {YIELD_MODEL_PATH}")
+        print(f"Loaded crop model from {CROP_MODEL_PATH}")
+    except Exception as exc:
+        print(f"Model preload skipped: {exc}")
     yield
 
 
@@ -216,10 +238,14 @@ def read_root() -> Dict[str, str]:
 
 
 @app.get("/health")
-def health_check() -> Dict[str, bool]:
+def health_check() -> Dict[str, Any]:
     return {
+        "status": "ok",
         "yield_model_loaded": yield_model is not None,
         "crop_model_loaded": crop_model is not None,
+        "yield_model_path": str(YIELD_MODEL_PATH),
+        "yield_model_exists": YIELD_MODEL_PATH.exists(),
+        "yield_model_bytes": YIELD_MODEL_PATH.stat().st_size if YIELD_MODEL_PATH.exists() else 0,
     }
 
 
@@ -380,8 +406,7 @@ def alert_history(user: Dict[str, Any] = Depends(get_current_user)) -> Dict[str,
 
 @app.post("/predict/crop", response_model=CropPredictionResponse)
 def predict_crop(payload: CropPredictionRequest) -> CropPredictionResponse:
-    if crop_model is None:
-        raise HTTPException(status_code=503, detail="Crop model is not loaded.")
+    ensure_models_loaded()
 
     feature_names = ["N", "P", "K", "temperature", "humidity", "ph", "rainfall"]
     input_df = pd.DataFrame([payload.model_dump()], columns=feature_names)
@@ -411,8 +436,7 @@ def predict_crop(payload: CropPredictionRequest) -> CropPredictionResponse:
 
 @app.post("/predict/yield", response_model=YieldPredictionResponse)
 def predict_yield(payload: YieldPredictionRequest) -> YieldPredictionResponse:
-    if yield_model is None:
-        raise HTTPException(status_code=503, detail="Yield model is not loaded.")
+    ensure_models_loaded()
 
     model_input = {
         "Area": payload.Area,

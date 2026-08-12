@@ -9,10 +9,21 @@ from uuid import uuid4
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
-if os.getenv("VERCEL") or os.getenv("VERCEL_ENV"):
-    DB_PATH = Path("/tmp/cropeazy.db")
-else:
-    DB_PATH = PROJECT_ROOT / "data" / "cropeazy.db"
+
+def _resolve_db_path() -> Path:
+    if os.getenv("DATABASE_PATH"):
+        return Path(os.getenv("DATABASE_PATH"))
+
+    if os.getenv("RAILWAY_ENVIRONMENT") or os.getenv("RAILWAY_VOLUME_MOUNT_PATH"):
+        return Path("/data/cropeazy.db")
+
+    if os.getenv("VERCEL") or os.getenv("VERCEL_ENV"):
+        return Path("/tmp/cropeazy.db")
+
+    return PROJECT_ROOT / "data" / "cropeazy.db"
+
+
+DB_PATH = _resolve_db_path()
 
 
 def init_db() -> None:
