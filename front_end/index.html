@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#14532d">
+    <meta name="description" content="CropEazy — AI crop recommendation, yield prediction, pest alerts, and farm dashboard in INR.">
+    <title>CropEazy — Crop Intelligence</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- External Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- =========================================================
+     CINEMATIC BACKGROUND
+========================================================= -->
+
+<div class="video-layer">
+
+    <video
+        autoplay
+        muted
+        loop
+        playsinline
+        poster=""
+    >
+        <source
+            src="https://designerstephen.github.io/public-assets/videos/serene-art-hero.mp4"
+            type="video/mp4"
+        >
+    </video>
+
+    <div class="video-overlay"></div>
+
+</div>
+
+
+<nav class="site-header">
+
+    <div
+        class="max-w-[1280px] mx-auto px-6 md:px-8 py-4 md:py-5
+               grid grid-cols-3 items-center"
+    >
+
+       
+        <div>
+            <a
+                href="#"
+                onclick="showPage('page1')"
+                class="serif text-[30px] text-[#0f172a]"
+            >
+                CropEazy<sup class="text-xs ml-1">®</sup>
+            </a>
+        </div>
+
+
+        <!-- CENTER -->
+        <div
+            class="desktop-nav flex justify-center items-center gap-10"
+        >
+
+            <button
+                onclick="showPage('page1')"
+                class="nav-link text-sm font-medium text-[#0f172a]"
+            >
+                Predict
+            </button>
+
+            <button
+                onclick="showPage('page3')"
+                class="nav-link text-sm font-medium text-[#0f172a]"
+            >
+                Dashboard
+            </button>
+
+            <button
+                type="button"
+                onclick="showPage('page-how')"
+                class="nav-link text-sm font-medium text-[#0f172a]"
+            >
+                How it works
+            </button>
+
+        </div>
+
+
+        <!-- RIGHT -->
+        <div class="flex justify-end items-center gap-3">
+
+            <span id="nav-user-label" class="hidden text-xs font-medium text-[hsl(215,25%,32%)]"></span>
+
+            <button
+                id="nav-login-btn"
+                type="button"
+                onclick="showPage('page-login')"
+                class="editorial-button border border-black/15 bg-white/70 px-5 py-2 rounded-full text-sm font-medium"
+            >
+                Login
+            </button>
+
+            <button
+                id="nav-logout-btn"
+                type="button"
+                onclick="logout()"
+                class="editorial-button border border-black/15 bg-white/70 px-5 py-2 rounded-full text-sm font-medium hidden"
+            >
+                Logout
+            </button>
+
+            <button
+                onclick="document.getElementById('prediction-form').scrollIntoView({behavior:'smooth'})"
+                class="editorial-button
+                       bg-black text-white
+                       px-6 py-3
+                       rounded-full
+                       text-sm font-medium"
+            >
+                Find my crop
+            </button>
+
+        </div>
+
+    </div>
+
+</nav>
+
+
+<!-- =========================================================
+     PAGE — HOW IT WORKS
+========================================================= -->
+
+<section id="page-how" class="page page-shell">
+
+    <div class="min-h-screen flex items-center justify-center px-6 pt-8 pb-20">
+
+        <div class="max-w-[900px] w-full mx-auto text-center">
+
+            <p class="text-xs uppercase tracking-[.3em] font-medium mb-5 fade-rise">
+                Platform guide
+            </p>
+
+            <h1 class="serif text-[56px] md:text-[64px] leading-[.95] tracking-[-1.5px] mb-6 fade-rise">
+                How
+                <em class="not-italic">CropEazy</em>
+                works
+            </h1>
+
+            <p class="max-w-[640px] mx-auto text-[18px] leading-[1.625] text-[hsl(215,25%,32%)] mb-14 fade-rise delay-1">
+                From login to harvest planning — here is the full journey of how predictions,
+                alerts, and your personal dashboard come together.
+            </p>
+
+            <div class="space-y-5 text-left">
+
+                <div class="how-step rounded-[28px] p-7 md:p-8 fade-rise delay-1">
+                    <p class="text-xs uppercase tracking-[.22em] font-medium mb-2 text-center">Step 01</p>
+                    <h2 class="serif text-3xl text-center mb-3">Sign in with OTP</h2>
+                    <p class="text-sm text-[hsl(215,25%,32%)] text-center leading-relaxed">
+                        Enter your name and mobile number. We send a one-time password to verify you,
+                        so each farmer gets a private account and separate dashboard records.
+                    </p>
+                </div>
+
+                <div class="how-step rounded-[28px] p-7 md:p-8 fade-rise delay-2">
+                    <p class="text-xs uppercase tracking-[.22em] font-medium mb-2 text-center">Step 02</p>
+                    <h2 class="serif text-3xl text-center mb-3">Allow GPS location</h2>
+                    <p class="text-sm text-[hsl(215,25%,32%)] text-center leading-relaxed">
+                        CropEazy reads your coordinates to auto-fill temperature, humidity, rainfall,
+                        and your region — so you spend less time typing climate data.
+                    </p>
+                </div>
+
+                <div class="how-step rounded-[28px] p-7 md:p-8 fade-rise delay-2">
+                    <p class="text-xs uppercase tracking-[.22em] font-medium mb-2 text-center">Step 03</p>
+                    <h2 class="serif text-3xl text-center mb-3">Choose your prediction mode</h2>
+                    <p class="text-sm text-[hsl(215,25%,32%)] text-center leading-relaxed">
+                        <strong>Recommend a crop</strong> uses soil nutrients and climate to suggest the best crop.
+                        <strong>Predict production</strong> estimates total output in tonnes from farm area,
+                        crop type, and regional parameters — all powered by trained ML models.
+                    </p>
+                </div>
+
+                <div class="how-step rounded-[28px] p-7 md:p-8 fade-rise delay-3">
+                    <p class="text-xs uppercase tracking-[.22em] font-medium mb-2 text-center">Step 04</p>
+                    <h2 class="serif text-3xl text-center mb-3">Review pests &amp; advisories</h2>
+                    <p class="text-sm text-[hsl(215,25%,32%)] text-center leading-relaxed">
+                        After prediction, you see a seasonal pest calendar showing which insects and diseases
+                        are most likely during each month and Kharif / Rabi / Zaid season for your crop.
+                    </p>
+                </div>
+
+                <div class="how-step rounded-[28px] p-7 md:p-8 fade-rise delay-3">
+                    <p class="text-xs uppercase tracking-[.22em] font-medium mb-2 text-center">Step 05</p>
+                    <h2 class="serif text-3xl text-center mb-3">Enable emergency SMS alerts</h2>
+                    <p class="text-sm text-[hsl(215,25%,32%)] text-center leading-relaxed">
+                        If a flood, heatwave, or storm is forecast near your field, CropEazy sends an SMS
+                        to your verified mobile number so you can protect crops in time.
+                    </p>
+                </div>
+
+                <div class="how-step rounded-[28px] p-7 md:p-8 fade-rise delay-3">
+                    <p class="text-xs uppercase tracking-[.22em] font-medium mb-2 text-center">Step 06</p>
+                    <h2 class="serif text-3xl text-center mb-3">Track profit &amp; loss in ₹</h2>
+                    <p class="text-sm text-[hsl(215,25%,32%)] text-center leading-relaxed">
+                        Production predictions are saved to your dashboard with revenue, costs, and net profit
+                        in Indian Rupees — including seed, labour, fertiliser, and market price inputs.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="mt-12 flex flex-col sm:flex-row gap-4 justify-center fade-rise delay-3">
+                <button
+                    type="button"
+                    onclick="showPage('page1')"
+                    class="editorial-button bg-black text-white px-8 py-4 rounded-full text-sm font-medium"
+                >
+                    Start predicting →
+                </button>
+                <button
+                    type="button"
+                    onclick="showPage('page-login')"
+                    class="editorial-button border border-black/15 bg-white/70 px-8 py-4 rounded-full text-sm font-medium"
+                >
+                    Login to your account
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     PAGE LOGIN
+========================================================= -->
+
+<section id="page-login" class="page page-shell">
+
+    <div class="min-h-screen flex items-center justify-center px-6 pt-8 pb-20">
+
+        <div class="max-w-md w-full result-card rounded-[32px] p-8 md:p-10">
+
+            <p class="text-xs uppercase tracking-[.25em] font-medium mb-3">Secure farmer login</p>
+            <h1 class="serif text-4xl mb-3">Sign in with OTP</h1>
+            <p class="text-sm text-[hsl(215,25%,32%)] mb-8">
+                Verify your mobile number to save your dashboard, receive calamity SMS alerts,
+                and keep your farm records separate from other users.
+            </p>
+
+            <div id="login-step-phone" class="space-y-4">
+                <div class="input-card rounded-2xl p-5">
+                    <label for="login-name" class="block text-xs uppercase tracking-[.18em] font-medium mb-3">Full name</label>
+                    <input id="login-name" type="text" placeholder="Your name" class="w-full text-xl font-medium">
+                </div>
+
+                <div class="input-card rounded-2xl p-5">
+                    <label for="login-phone" class="block text-xs uppercase tracking-[.18em] font-medium mb-3">Mobile number</label>
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-sm text-[hsl(215,25%,32%)]">+91</span>
+                        <input id="login-phone" type="tel" maxlength="10" placeholder="9876543210" class="w-full text-xl font-medium">
+                    </div>
+                </div>
+
+                <button
+                    type="button"
+                    onclick="sendOtp()"
+                    class="editorial-button bg-black text-white w-full px-6 py-4 rounded-full text-sm font-medium"
+                >
+                    Send OTP
+                </button>
+            </div>
+
+            <div id="login-step-otp" class="space-y-4 hidden">
+                <div class="input-card rounded-2xl p-5">
+                    <label for="login-otp" class="block text-xs uppercase tracking-[.18em] font-medium mb-3">Enter OTP</label>
+                    <input id="login-otp" type="text" maxlength="6" placeholder="6-digit code" class="w-full text-2xl font-medium tracking-[.3em]">
+                </div>
+
+                <p id="login-otp-hint" class="text-xs text-[hsl(215,25%,32%)]"></p>
+
+                <button
+                    type="button"
+                    onclick="verifyOtp()"
+                    class="editorial-button bg-black text-white w-full px-6 py-4 rounded-full text-sm font-medium"
+                >
+                    Verify &amp; login
+                </button>
+
+                <button
+                    type="button"
+                    onclick="resetLoginFlow()"
+                    class="editorial-button border border-black/15 w-full px-6 py-3 rounded-full text-sm font-medium"
+                >
+                    Change number
+                </button>
+            </div>
+
+            <p id="login-dev-hint" class="hidden mt-4 text-xs text-[hsl(215,25%,32%)]"></p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     PAGE 1
+========================================================= -->
+
+<section id="page1" class="page page-shell active">
+
+    <!-- HERO -->
+
+    <div
+        class="min-h-screen
+               flex items-center justify-center
+               px-6 pt-8 pb-20"
+    >
+
+        <div
+            class="max-w-[1280px]
+                   w-full mx-auto
+                   text-center"
+        >
+
+            <!-- Eyebrow -->
+
+            <div
+                class="fade-rise
+                       inline-flex items-center gap-3
+                       mb-8"
+            >
+
+                <span
+                    class="w-2 h-2
+                           rounded-full
+                           bg-black"
+                ></span>
+
+                <span
+                    class="text-xs
+                           tracking-[.25em]
+                           uppercase
+                           font-medium"
+                >
+                    AI powered agriculture
+                </span>
+
+            </div>
+
+
+            <!-- HEADING -->
+
+            <h1
+                class="hero-heading
+                       serif
+                       text-[80px]
+                       leading-[.95]
+                       tracking-[-2.46px]
+                       text-[#0f172a]
+                       fade-rise"
+            >
+
+                Grow with
+                <em class="not-italic">
+                    intelligence.
+                </em>
+
+            </h1>
+
+
+            <!-- SUBTEXT -->
+
+            <p
+                class="max-w-[670px]
+                       mx-auto
+                       mt-8
+                       text-[18px]
+                       leading-[1.625]
+                       text-[hsl(215,25%,32%)]
+                       fade-rise delay-1"
+            >
+
+                Choose whether you want a crop recommendation from soil and climate
+                data, or a production estimate in tonnes from your farm parameters.
+
+            </p>
+
+
+            <!-- MODE SELECTOR -->
+
+            <div
+                class="max-w-3xl
+                       mx-auto
+                       mt-10
+                       flex
+                       flex-col
+                       sm:flex-row
+                       gap-4
+                       justify-center
+                       fade-rise delay-1"
+            >
+
+                <button
+                    id="tab-crop"
+                    type="button"
+                    onclick="setMode('crop')"
+                    class="mode-tab
+                           mode-tab-active
+                           px-8
+                           py-4
+                           rounded-full
+                           text-sm
+                           font-medium"
+                >
+                    Recommend a crop
+                </button>
+
+                <button
+                    id="tab-yield"
+                    type="button"
+                    onclick="setMode('yield')"
+                    class="mode-tab
+                           px-8
+                           py-4
+                           rounded-full
+                           text-sm
+                           font-medium"
+                >
+                    Predict production (tonnes)
+                </button>
+
+            </div>
+
+
+            <!-- FORM -->
+
+            <div
+                id="prediction-form"
+                class="max-w-5xl
+                       mx-auto
+                       mt-16
+                       text-left
+                       fade-rise delay-2"
+            >
+
+                <p
+                    id="form-description"
+                    class="text-sm text-[hsl(215,25%,32%)] mb-4"
+                >
+                    Enter soil and climate values to get a crop recommendation from the trained model.
+                </p>
+
+                <div
+                    id="location-status"
+                    class="location-banner hidden mb-6"
+                >
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div>
+                            <p class="text-xs uppercase tracking-[.2em] font-medium mb-1">Location detected</p>
+                            <p id="location-label" class="text-sm font-medium">—</p>
+                        </div>
+                        <button
+                            type="button"
+                            onclick="requestLocationAccess()"
+                            class="editorial-button bg-black text-white px-5 py-2 rounded-full text-xs font-medium"
+                        >
+                            Refresh GPS
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mb-8 flex flex-col sm:flex-row gap-3 justify-center">
+                    <button
+                        type="button"
+                        onclick="requestLocationAccess()"
+                        class="editorial-button border border-black/15 bg-white/70 px-6 py-3 rounded-full text-sm font-medium"
+                    >
+                        Use my GPS location
+                    </button>
+                </div>
+
+
+                <!-- CROP RECOMMENDATION FORM -->
+
+                <div id="crop-form">
+
+                    <div class="mb-14">
+
+                        <div
+                            class="flex items-end justify-between
+                                   border-b border-black/10
+                                   pb-5 mb-7"
+                        >
+
+                            <div>
+
+                                <p
+                                    class="text-xs
+                                           uppercase
+                                           tracking-[.25em]
+                                           font-medium
+                                           text-[hsl(215,25%,32%)]"
+                                >
+                                    01
+                                </p>
+
+                                <h2 class="serif text-4xl mt-1">
+                                    Soil nutrients
+                                </h2>
+
+                            </div>
+
+                            <p class="hidden md:block text-sm text-[hsl(215,25%,32%)]">
+                                N, P, K and pH
+                            </p>
+
+                        </div>
+
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+
+                            <div class="input-card rounded-2xl p-6">
+                                <label for="crop-n" class="block text-xs uppercase tracking-[.18em] font-medium mb-3">Nitrogen</label>
+                                <input id="crop-n" type="number" min="0" step="any" placeholder="90" class="w-full text-3xl font-medium">
+                            </div>
+
+                            <div class="input-card rounded-2xl p-6">
+                                <label for="crop-p" class="block text-xs uppercase tracking-[.18em] font-medium mb-3">Phosphorus</label>
+                                <input id="crop-p" type="number" min="0" step="any" placeholder="42" class="w-full text-3xl font-medium">
+                            </div>
+
+                            <div class="input-card rounded-2xl p-6">
+                                <label for="crop-k" class="block text-xs uppercase tracking-[.18em] font-medium mb-3">Potassium</label>
+                                <input id="crop-k" type="number" min="0" step="any" placeholder="43" class="w-full text-3xl font-medium">
+                            </div>
+
+                            <div class="input-card rounded-2xl p-6">
+                                <label for="crop-ph" class="block text-xs uppercase tracking-[.18em] font-medium mb-3">Soil pH</label>
+                                <input id="crop-ph" type="number" min="0" max="14" step="0.1" placeholder="6.5" class="w-full text-3xl font-medium">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div>
+
+                        <div
+                            class="flex items-end justify-between
+                                   border-b border-black/10
+                                   pb-5 mb-7"
+                        >
+
+                            <div>
+
+                                <p
+                                    class="text-xs
+                                           uppercase
+                                           tracking-[.25em]
+                                           font-medium
+                                           text-[hsl(215,25%,32%)]"
+                                >
+                                    02
+                                </p>
+
+                                <h2 class="serif text-4xl mt-1">
+                                    Climate
+                                </h2>
+
+                            </div>
+
+                            <p class="hidden md:block text-sm text-[hsl(215,25%,32%)]">
+                                Temperature, humidity, rainfall
+                            </p>
+
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                            <div class="input-card rounded-2xl p-6">
+                                <label for="crop-temperature" class="block text-xs uppercase tracking-[.18em] font-medium mb-3">Temperature</label>
+                                <div class="flex items-baseline gap-2">
+                                    <input id="crop-temperature" type="number" step="any" placeholder="20.8" class="w-full text-3xl font-medium">
+                                    <span class="text-sm text-[hsl(215,25%,32%)]">°C</span>
+                                </div>
+                            </div>
+
+                            <div class="input-card rounded-2xl p-6">
+                                <label for="crop-humidity" class="block text-xs uppercase tracking-[.18em] font-medium mb-3">Humidity</label>
+                                <div class="flex items-baseline gap-2">
+                                    <input id="crop-humidity" type="number" min="0" max="100" step="any" placeholder="82" class="w-full text-3xl font-medium">
+                                    <span class="text-sm text-[hsl(215,25%,32%)]">%</span>
+                                </div>
+                            </div>
+
+                            <div class="input-card rounded-2xl p-6">
+                                <label for="crop-rainfall" class="block text-xs uppercase tracking-[.18em] font-medium mb-3">Rainfall</label>
+                                <div class="flex items-baseline gap-2">
+                                    <input id="crop-rainfall" type="number" min="0" step="any" placeholder="202" class="w-full text-3xl font-medium">
+                                    <span class="text-sm text-[hsl(215,25%,32%)]">mm</span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- YIELD PREDICTION FORM -->
+
+                <div id="yield-form" class="hidden">
+
+                    <div class="mb-14">
+
+                        <div
+                            class="flex items-end justify-between
+                                   border-b border-black/10
+                                   pb-5 mb-7"
+                        >
+
+                            <div>
+
+                                <p
+                                    class="text-xs
+                                           uppercase
+                                           tracking-[.25em]
+                                           font-medium
+                                           text-[hsl(215,25%,32%)]"
+                                >
+                                    01
+                                </p>
+
+                                <h2 class="serif text-4xl mt-1">
+                                    Farm details
+                                </h2>
+
+                            </div>
+
+                            <p class="hidden md:block text-sm text-[hsl(215,25%,32%)]">
+                                Region, crop, and area
+                            </p>
+
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                            <div class="input-card rounded-2xl p-6">
+                                <label for="yield-area" class="block text-xs uppercase tracking-[.18em] font-medium mb-3">Region / Country</label>
+                                <input id="yield-area" type="text" list="area-options" placeholder="India" class="w-full text-2xl font-medium">
+                                <datalist id="area-options"></datalist>
+                            </div>
+
+                            <div class="input-card rounded-2xl p-6">
+                                <label for="yield-item" class="block text-xs uppercase tracking-[.18em] font-medium mb-3">Crop</label>
+                                <input id="yield-item" type="text" list="item-options" placeholder="Rice, paddy" class="w-full text-2xl font-medium">
+                                <datalist id="item-options"></datalist>
+                            </div>
+
+                            <div class="input-card rounded-2xl p-6">
+                                <label for="yield-year" class="block text-xs uppercase tracking-[.18em] font-medium mb-3">Year</label>
+                                <input id="yield-year" type="number" min="1900" max="2100" placeholder="2024" class="w-full text-3xl font-medium">
+                            </div>
+
+                            <div class="input-card rounded-2xl p-6">
+                                <label for="yield-farm-area" class="block text-xs uppercase tracking-[.18em] font-medium mb-3">Farm area</label>
+                                <div class="flex items-baseline gap-2">
+                                    <input id="yield-farm-area" type="number" min="0" step="any" placeholder="10" class="w-full text-3xl font-medium">
+                                    <span class="text-sm text-[hsl(215,25%,32%)]">ha</span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div>
+
+                        <div
+                            class="flex items-end justify-between
+                                   border-b border-black/10
+                                   pb-5 mb-7"
+                        >
+
+                            <div>
+
+                                <p
+                                    class="text-xs
+                                           uppercase
+                                           tracking-[.25em]
+                                           font-medium
+                                           text-[hsl(215,25%,32%)]"
+                                >
+                                    02
+                                </p>
+
+                                <h2 class="serif text-4xl mt-1">
+                                    Climate & inputs
+                                </h2>
+
+                            </div>
+
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                            <div class="input-card rounded-2xl p-6">
+                                <label for="yield-temp" class="block text-xs uppercase tracking-[.18em] font-medium mb-3">Avg temperature</label>
+                                <div class="flex items-baseline gap-2">
+                                    <input id="yield-temp" type="number" step="any" placeholder="25.4" class="w-full text-3xl font-medium">
+                                    <span class="text-sm text-[hsl(215,25%,32%)]">°C</span>
+                                </div>
+                            </div>
+
+                            <div class="input-card rounded-2xl p-6">
+                                <label for="yield-rainfall" class="block text-xs uppercase tracking-[.18em] font-medium mb-3">Annual rainfall</label>
+                                <div class="flex items-baseline gap-2">
+                                    <input id="yield-rainfall" type="number" min="0" step="any" placeholder="1200" class="w-full text-3xl font-medium">
+                                    <span class="text-sm text-[hsl(215,25%,32%)]">mm</span>
+                                </div>
+                            </div>
+
+                            <div class="input-card rounded-2xl p-6">
+                                <label for="yield-pesticides" class="block text-xs uppercase tracking-[.18em] font-medium mb-3">Pesticides</label>
+                                <div class="flex items-baseline gap-2">
+                                    <input id="yield-pesticides" type="number" min="0" step="any" placeholder="45000" class="w-full text-3xl font-medium">
+                                    <span class="text-sm text-[hsl(215,25%,32%)]">tonnes</span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="mt-8">
+
+                        <div
+                            class="flex items-end justify-between
+                                   border-b border-black/10
+                                   pb-5 mb-7"
+                        >
+
+                            <div>
+                                <p class="text-xs uppercase tracking-[.25em] font-medium text-[hsl(215,25%,32%)]">03</p>
+                                <h2 class="serif text-4xl mt-1">Cost inputs</h2>
+                            </div>
+
+                            <p class="hidden md:block text-sm text-[hsl(215,25%,32%)]">
+                                Used for profit / loss dashboard
+                            </p>
+
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+                            <div class="input-card rounded-2xl p-6">
+                                <label for="yield-market-price" class="block text-xs uppercase tracking-[.18em] font-medium mb-3">Market price</label>
+                                <div class="flex items-baseline gap-2">
+                                    <input id="yield-market-price" type="number" min="0" step="any" placeholder="35000" class="w-full text-2xl font-medium">
+                                    <span class="text-sm text-[hsl(215,25%,32%)]">₹/t</span>
+                                </div>
+                            </div>
+
+                            <div class="input-card rounded-2xl p-6">
+                                <label for="yield-seed-cost" class="block text-xs uppercase tracking-[.18em] font-medium mb-3">Seed cost</label>
+                                <div class="flex items-baseline gap-2">
+                                    <input id="yield-seed-cost" type="number" min="0" step="any" placeholder="1200" class="w-full text-2xl font-medium">
+                                    <span class="text-sm text-[hsl(215,25%,32%)]">₹</span>
+                                </div>
+                            </div>
+
+                            <div class="input-card rounded-2xl p-6">
+                                <label for="yield-labor-cost" class="block text-xs uppercase tracking-[.18em] font-medium mb-3">Labor cost</label>
+                                <div class="flex items-baseline gap-2">
+                                    <input id="yield-labor-cost" type="number" min="0" step="any" placeholder="2500" class="w-full text-2xl font-medium">
+                                    <span class="text-sm text-[hsl(215,25%,32%)]">₹</span>
+                                </div>
+                            </div>
+
+                            <div class="input-card rounded-2xl p-6">
+                                <label for="yield-fertilizer-cost" class="block text-xs uppercase tracking-[.18em] font-medium mb-3">Fertilizer cost</label>
+                                <div class="flex items-baseline gap-2">
+                                    <input id="yield-fertilizer-cost" type="number" min="0" step="any" placeholder="800" class="w-full text-2xl font-medium">
+                                    <span class="text-sm text-[hsl(215,25%,32%)]">₹</span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- CTA -->
+
+                <div
+                    class="mt-12
+                           flex
+                           flex-col
+                           md:flex-row
+                           items-center
+                           justify-between
+                           gap-6"
+                >
+
+                    <p
+                        class="text-sm
+                               text-[hsl(215,25%,32%)]"
+                    >
+                        Predictions are made by a trained ML models with data from Kaggle
+                    </p>
+
+
+                    <button
+                        id="submit-button"
+                        type="button"
+                        onclick="submitPrediction()"
+                        class="editorial-button
+                               bg-black
+                               text-white
+                               px-14
+                               py-5
+                               rounded-full
+                               text-base
+                               font-medium
+                               min-w-[240px]"
+                    >
+                        Recommend my crop →
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     PAGE 2 — RESULTS
+========================================================= -->
+
+<section id="page2" class="page page-shell">
+
+    <div
+        class="min-h-screen
+               flex items-center justify-center
+               px-6 pt-8 pb-20"
+    >
+
+        <div
+            class="max-w-[1100px]
+                   w-full
+                   mx-auto"
+        >
+
+            <!-- HEADER -->
+
+            <div class="text-center mb-12">
+
+                <p
+                    id="result-mode-label"
+                    class="text-xs
+                           uppercase
+                           tracking-[.3em]
+                           font-medium
+                           mb-5
+                           fade-rise"
+                >
+                    Prediction complete
+                </p>
+
+                <h1
+                    id="result-title"
+                    class="serif
+                           text-[64px]
+                           leading-[.95]
+                           tracking-[-1.5px]
+                           fade-rise"
+                >
+                    Your field's
+                    <em class="not-italic">
+                        potential.
+                    </em>
+                </h1>
+
+            </div>
+
+
+            <!-- RESULT -->
+
+            <div
+                class="result-card
+                       rounded-[32px]
+                       p-8 md:p-14
+                       fade-rise delay-1"
+            >
+
+                <div
+                    class="grid
+                           grid-cols-1
+                           md:grid-cols-2
+                           gap-14
+                           items-start"
+                >
+
+                    <div>
+
+                    <!-- CROP RESULT -->
+
+                    <div id="crop-result-block" class="text-center">
+
+                        <p
+                            class="text-xs
+                                   uppercase
+                                   tracking-[.25em]
+                                   font-medium
+                                   mb-8"
+                        >
+                            Recommended crop
+                        </p>
+
+                        <div class="crop-circle">
+
+                            <span
+                                id="cropResult"
+                                class="serif
+                                       text-5xl
+                                       capitalize"
+                            >
+                                —
+                            </span>
+
+                        </div>
+
+                        <p
+                            id="cropDescription"
+                            class="mt-8
+                                   text-[18px]
+                                   leading-[1.625]
+                                   text-[hsl(215,25%,32%)]"
+                        >
+                            Model recommendation will appear here.
+                        </p>
+
+                    </div>
+
+
+                    <!-- YIELD RESULT -->
+
+                    <div id="yield-result-block" class="hidden">
+
+                        <div
+                            class="border-b
+                                   border-black/10
+                                   pb-8
+                                   mb-8"
+                        >
+
+                            <p
+                                class="text-xs
+                                       uppercase
+                                       tracking-[.25em]
+                                       font-medium
+                                       mb-4"
+                            >
+                                Estimated total production
+                            </p>
+
+                            <div
+                                class="flex
+                                       items-baseline
+                                       gap-3"
+                            >
+
+                                <span
+                                    id="yieldResult"
+                                    class="serif
+                                           text-7xl"
+                                >
+                                    —
+                                </span>
+
+                                <span
+                                    class="text-lg
+                                           text-[hsl(215,25%,32%)]"
+                                >
+                                    tonnes
+                                </span>
+
+                            </div>
+
+                            <p class="mt-4 text-sm text-[hsl(215,25%,32%)]">
+                                Model yield rate:
+                                <span id="yieldPerHa" class="font-medium text-[#0f172a]">—</span>
+                                hg/ha
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- CONFIDENCE -->
+
+                    <div id="confidence-block" class="mt-8">
+
+                        <p
+                            class="text-xs
+                                   uppercase
+                                   tracking-[.25em]
+                                   font-medium
+                                   mb-5"
+                        >
+                            Top model candidates
+                        </p>
+
+                        <div id="confidenceList" class="space-y-3"></div>
+
+                    </div>
+
+                    </div>
+
+
+                    <!-- SUMMARY -->
+
+                    <div>
+
+                        <p
+                            class="text-xs
+                                   uppercase
+                                   tracking-[.25em]
+                                   font-medium
+                                   mb-5"
+                        >
+                            Your conditions
+                        </p>
+
+                        <div
+                            class="grid
+                                   grid-cols-2
+                                   gap-y-4
+                                   gap-x-8
+                                   text-sm"
+                        >
+
+                            <div>
+                                <span id="summaryLabel1" class="text-[hsl(215,25%,32%)]">Field 1</span>
+                                <div id="summaryArea" class="font-medium mt-1">—</div>
+                            </div>
+
+                            <div>
+                                <span id="summaryLabel2" class="text-[hsl(215,25%,32%)]">Field 2</span>
+                                <div id="summaryItem" class="font-medium mt-1">—</div>
+                            </div>
+
+                            <div>
+                                <span id="summaryLabel3" class="text-[hsl(215,25%,32%)]">Field 3</span>
+                                <div id="summaryN" class="font-medium mt-1">—</div>
+                            </div>
+
+                            <div>
+                                <span id="summaryLabel4" class="text-[hsl(215,25%,32%)]">Field 4</span>
+                                <div id="summaryP" class="font-medium mt-1">—</div>
+                            </div>
+
+                            <div>
+                                <span id="summaryLabel5" class="text-[hsl(215,25%,32%)]">Field 5</span>
+                                <div id="summaryK" class="font-medium mt-1">—</div>
+                            </div>
+
+                            <div>
+                                <span id="summaryLabel6" class="text-[hsl(215,25%,32%)]">Field 6</span>
+                                <div id="summaryPH" class="font-medium mt-1">—</div>
+                            </div>
+
+                            <div>
+                                <span id="summaryExtraLabel" class="text-[hsl(215,25%,32%)]">Extra</span>
+                                <div id="summaryExtra" class="font-medium mt-1">—</div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- PEST & ALERT PANEL -->
+
+                <div id="insights-panel" class="mt-10 hidden">
+
+                    <div class="result-card rounded-[28px] p-8 mb-6">
+                        <p class="text-xs uppercase tracking-[.25em] font-medium mb-4">Pest prediction calendar</p>
+                        <p id="pest-season-label" class="text-sm text-[hsl(215,25%,32%)] mb-5"></p>
+                        <div id="pest-current-risks" class="space-y-3 mb-6"></div>
+                        <div id="pest-seasonal-calendar" class="space-y-3"></div>
+                    </div>
+
+                    <div class="result-card rounded-[28px] p-8">
+                        <p class="text-xs uppercase tracking-[.25em] font-medium mb-4">Emergency crop alert</p>
+                        <p class="text-sm text-[hsl(215,25%,32%)] mb-5">
+                            If a flood, heatwave, or storm is approaching your field, CropEazy sends an SMS
+                            to your verified mobile number.
+                        </p>
+                        <button
+                            id="enable-alert-btn"
+                            type="button"
+                            onclick="enableEmergencyAlerts()"
+                            class="editorial-button bg-black text-white px-6 py-3 rounded-full text-sm font-medium"
+                        >
+                            Enable SMS calamity alerts
+                        </button>
+                        <p id="alert-status-text" class="text-xs text-[hsl(215,25%,32%)] mt-4"></p>
+                    </div>
+
+                </div>
+
+
+                <!-- ACTIONS -->
+
+                <div
+                    class="mt-14
+                           pt-8
+                           border-t
+                           border-black/10
+                           flex
+                           flex-col
+                           md:flex-row
+                           justify-between
+                           items-center
+                           gap-5"
+                >
+
+                    <p
+                        class="text-sm
+                               text-[hsl(215,25%,32%)]"
+                    >
+                        Want to try another combination?
+                    </p>
+
+                    <button
+                        onclick="showPage('page1')"
+                        class="editorial-button
+                               bg-black
+                               text-white
+                               px-8
+                               py-4
+                               rounded-full
+                               text-sm
+                               font-medium"
+                    >
+                        ← Recalculate
+                    </button>
+
+                    <button
+                        id="save-dashboard-btn"
+                        type="button"
+                        onclick="saveCurrentResultToDashboard()"
+                        class="editorial-button
+                               border border-black/15
+                               bg-white
+                               text-black
+                               px-8
+                               py-4
+                               rounded-full
+                               text-sm
+                               font-medium hidden"
+                    >
+                        Save to dashboard
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     PAGE 3 — PROFIT / LOSS DASHBOARD
+========================================================= -->
+
+<section id="page3" class="page page-shell">
+
+    <div class="min-h-screen flex items-center justify-center px-6 pt-8 pb-20">
+
+        <div class="max-w-[1200px] w-full mx-auto">
+
+            <div class="text-center mb-12">
+                <p class="text-xs uppercase tracking-[.3em] font-medium mb-5 fade-rise">
+                    Farm performance
+                </p>
+                <h1 class="serif text-[64px] leading-[.95] tracking-[-1.5px] fade-rise">
+                    Profit &amp;
+                    <em class="not-italic">loss dashboard.</em>
+                </h1>
+                <p class="max-w-[640px] mx-auto mt-6 text-[18px] text-[hsl(215,25%,32%)] fade-rise delay-1">
+                    Track predicted production, revenue, costs, and margins for each crop you analyze.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+
+                <div class="dashboard-stat rounded-2xl p-6">
+                    <p class="text-xs uppercase tracking-[.18em] mb-2">Total revenue</p>
+                    <p id="dash-total-revenue" class="serif text-4xl">₹0</p>
+                </div>
+
+                <div class="dashboard-stat rounded-2xl p-6">
+                    <p class="text-xs uppercase tracking-[.18em] mb-2">Total costs</p>
+                    <p id="dash-total-costs" class="serif text-4xl">₹0</p>
+                </div>
+
+                <div class="dashboard-stat rounded-2xl p-6">
+                    <p class="text-xs uppercase tracking-[.18em] mb-2">Net profit / loss</p>
+                    <p id="dash-net-profit" class="serif text-4xl profit-positive">₹0</p>
+                </div>
+
+                <div class="dashboard-stat rounded-2xl p-6">
+                    <p class="text-xs uppercase tracking-[.18em] mb-2">Avg margin</p>
+                    <p id="dash-avg-margin" class="serif text-4xl">0%</p>
+                </div>
+
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+
+                <div class="result-card rounded-[32px] p-8">
+                    <p class="text-xs uppercase tracking-[.25em] font-medium mb-6">Profit by crop</p>
+                    <div id="profit-chart" class="space-y-4"></div>
+                </div>
+
+                <div class="result-card rounded-[32px] p-8">
+                    <p class="text-xs uppercase tracking-[.25em] font-medium mb-6">Performance snapshot</p>
+                    <div class="space-y-4 text-sm">
+                        <div class="flex justify-between border-b border-black/10 pb-3">
+                            <span class="text-[hsl(215,25%,32%)]">Best performing crop</span>
+                            <span id="dash-best-crop" class="font-medium capitalize">—</span>
+                        </div>
+                        <div class="flex justify-between border-b border-black/10 pb-3">
+                            <span class="text-[hsl(215,25%,32%)]">Highest production</span>
+                            <span id="dash-top-production" class="font-medium">—</span>
+                        </div>
+                        <div class="flex justify-between border-b border-black/10 pb-3">
+                            <span class="text-[hsl(215,25%,32%)]">Tracked predictions</span>
+                            <span id="dash-record-count" class="font-medium">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-[hsl(215,25%,32%)]">Last updated</span>
+                            <span id="dash-last-updated" class="font-medium">—</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="result-card rounded-[32px] p-8 mb-8">
+                <p class="text-xs uppercase tracking-[.25em] font-medium mb-6">Emergency alert history</p>
+                <div id="alert-history-list" class="space-y-3 text-sm">
+                    <p class="text-[hsl(215,25%,32%)]">Login to view SMS alert history.</p>
+                </div>
+            </div>
+
+            <div class="result-card rounded-[32px] p-8">
+
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                    <p class="text-xs uppercase tracking-[.25em] font-medium">Crop records</p>
+                    <button
+                        type="button"
+                        onclick="clearDashboardRecords()"
+                        class="editorial-button border border-black/15 px-5 py-2 rounded-full text-xs font-medium"
+                    >
+                        Clear history
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="dashboard-table w-full text-sm">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Crop</th>
+                                <th>Region</th>
+                                <th>Production</th>
+                                <th>Revenue</th>
+                                <th>Costs</th>
+                                <th>Profit</th>
+                                <th>Margin</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dashboard-table-body">
+                            <tr>
+                                <td colspan="8" class="text-center text-[hsl(215,25%,32%)] py-8">
+                                    No records yet. Run a production prediction and save it here.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- GPS PERMISSION MODAL -->
+
+<div id="gps-modal" class="gps-modal hidden">
+    <div class="gps-modal-card rounded-[28px] p-8 max-w-md w-full mx-4">
+        <p class="text-xs uppercase tracking-[.25em] font-medium mb-3">Location access</p>
+        <h2 class="serif text-3xl mb-4">Use your GPS?</h2>
+        <p class="text-sm text-[hsl(215,25%,32%)] leading-relaxed mb-8">
+            CropEazy can read your GPS coordinates to auto-fill temperature, humidity, rainfall,
+            and your region. Soil nutrients still need to be entered manually.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-3">
+            <button
+                type="button"
+                onclick="acceptLocationAccess()"
+                class="editorial-button bg-black text-white px-6 py-3 rounded-full text-sm font-medium flex-1"
+            >
+                Allow location
+            </button>
+            <button
+                type="button"
+                onclick="dismissLocationModal()"
+                class="editorial-button border border-black/15 px-6 py-3 rounded-full text-sm font-medium flex-1"
+            >
+                Not now
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- External JavaScript -->
+
+<nav class="mobile-nav" aria-label="Mobile navigation">
+    <div class="mobile-nav-grid">
+        <button type="button" class="mobile-nav-btn" onclick="showPage('page1')">Predict</button>
+        <button type="button" class="mobile-nav-btn" onclick="showPage('page3')">Dashboard</button>
+        <button type="button" class="mobile-nav-btn" onclick="showPage('page-how')">Guide</button>
+        <button type="button" class="mobile-nav-btn" onclick="showPage('page-login')">Login</button>
+    </div>
+</nav>
+
+<script src="script.js"></script>
+
+</body>
+</html>
