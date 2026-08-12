@@ -23,7 +23,7 @@ def resolve_model_dir() -> Path:
         return bundled
 
     if os.getenv("VERCEL") or os.getenv("VERCEL_ENV"):
-        return Path("/tmp/cropeazy_models")
+        return Path("/tmp/models")
 
     return bundled
 

@@ -18,7 +18,7 @@ def _resolve_db_path() -> Path:
         return Path("/data/cropeazy.db")
 
     if os.getenv("VERCEL") or os.getenv("VERCEL_ENV"):
-        return Path("/tmp/cropeazy.db")
+        return Path("/tmp/app.db")
 
     return PROJECT_ROOT / "data" / "cropeazy.db"
 

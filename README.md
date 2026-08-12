@@ -53,7 +53,18 @@ We switched `render.yaml` to **`plan: free`** (no paid disk). Render sometimes s
 
 Verify: `https://YOUR-APP.onrender.com/health` → `yield_model_loaded: true`.
 
-Optional env vars in the Render dashboard: `JWT_SECRET` (auto-generated), Twilio keys for SMS.
+Optional env vars in the Render dashboard: `JWT_SECRET` (auto-generated), `OPENWEATHER_API_KEY` (for reliable GPS weather), Twilio keys for SMS.
+
+### OpenWeatherMap API key (recommended for GPS)
+
+1. Sign up at [openweathermap.org/api](https://openweathermap.org/api) (free).
+2. Copy your **API key** from the dashboard.
+3. In Render → your service → **Environment** → add:
+   - Key: `OPENWEATHER_API_KEY`
+   - Value: your API key
+4. Save and redeploy.
+
+New keys can take **up to 2 hours** to activate. After that, GPS auto-fill uses your own quota (1000 calls/day on free tier), not Render's shared IP limits.
 
 ---
 

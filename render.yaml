@@ -22,3 +22,5 @@ services:
         value: "true"
       - key: DATABASE_PATH
         value: /tmp/cropeazy.db
+      - key: OPENWEATHER_API_KEY
+        sync: false
