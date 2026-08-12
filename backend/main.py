@@ -36,6 +36,10 @@ YIELD_DATASET_PATH = PROJECT_ROOT / os.getenv("DATASET_DIR", "dataset") / os.get
     "YIELD_DATASET", "yield_df.csv"
 )
 
+
+def current_model_paths() -> tuple[Path, Path]:
+    return model_paths()
+
 yield_model: Any = None
 crop_model: Any = None
 yield_options: Dict[str, List[str]] = {"areas": [], "items": []}
@@ -70,27 +74,26 @@ def load_models() -> None:
         return
 
     ensure_model_files()
+    yield_path, crop_path = current_model_paths()
 
-    if not YIELD_MODEL_PATH.exists():
+    if not yield_path.exists():
         raise RuntimeError(
-            f"Yield model not found at {YIELD_MODEL_PATH}. "
-            "Ensure Git LFS files are pulled during deploy."
+            f"Yield model not found at {yield_path}. "
+            "Ensure models are downloaded during build."
         )
-    if not CROP_MODEL_PATH.exists():
+    if not crop_path.exists():
         raise RuntimeError(
-            f"Crop model not found at {CROP_MODEL_PATH}. "
-            "Ensure Git LFS files are pulled during deploy."
-        )
-
-    # Reject Git LFS pointer stubs (deployed without `git lfs pull`)
-    if YIELD_MODEL_PATH.stat().st_size < 1000:
-        raise RuntimeError(
-            "Yield model file looks like a Git LFS pointer, not the real model. "
-            "Run `git lfs pull` before deploy."
+            f"Crop model not found at {crop_path}. "
+            "Ensure models are downloaded during build."
         )
 
-    yield_model = load(YIELD_MODEL_PATH)
-    crop_model = load(CROP_MODEL_PATH)
+    if yield_path.stat().st_size < 1000:
+        raise RuntimeError(
+            "Yield model file looks like a Git LFS pointer, not the real model."
+        )
+
+    yield_model = load(yield_path)
+    crop_model = load(crop_path)
 
     if YIELD_DATASET_PATH.exists():
         df = pd.read_csv(YIELD_DATASET_PATH)
@@ -112,18 +115,19 @@ async def lifespan(_: FastAPI):
     init_db()
     try:
         load_models()
-        print(f"Loaded yield model from {YIELD_MODEL_PATH}")
-        print(f"Loaded crop model from {CROP_MODEL_PATH}")
+        yield_path, crop_path = current_model_paths()
+        print(f"Loaded yield model from {yield_path}")
+        print(f"Loaded crop model from {crop_path}")
     except Exception as exc:
         print(f"Model preload skipped: {exc}")
     yield
 
 
 app = FastAPI(
-    # title="CropEazy Intelligence API",
-    # # description="Crop recommendation, yield prediction, pest alerts, and farmer dashboard.",
-    # version="3.0.0",
-    # lifespan=lifespan,
+    title="CropEazy Intelligence API",
+    description="Crop recommendation, yield prediction, pest alerts, and farmer dashboard.",
+    version="3.0.0",
+    lifespan=lifespan,
 )
 
 app.add_middleware(
@@ -235,13 +239,14 @@ def read_root() -> Dict[str, str]:
 
 @app.get("/health")
 def health_check() -> Dict[str, Any]:
+    yield_path, crop_path = current_model_paths()
     return {
         "status": "ok",
         "yield_model_loaded": yield_model is not None,
         "crop_model_loaded": crop_model is not None,
-        "yield_model_path": str(YIELD_MODEL_PATH),
-        "yield_model_exists": YIELD_MODEL_PATH.exists(),
-        "yield_model_bytes": YIELD_MODEL_PATH.stat().st_size if YIELD_MODEL_PATH.exists() else 0,
+        "yield_model_path": str(yield_path),
+        "yield_model_exists": yield_path.exists(),
+        "yield_model_bytes": yield_path.stat().st_size if yield_path.exists() else 0,
     }
 
 

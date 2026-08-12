@@ -1,15 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "python -m backend.model_download",
   "functions": {
-    "api/index.py": {
+    "main.py": {
       "maxDuration": 60,
-      "memory": 1024,
-      "excludeFiles": "{models/**,dataset/**,.venv/**,**/__pycache__/**}"
-    },
-    "backend/main.py": {
-      "maxDuration": 60,
-      "memory": 1024,
-      "excludeFiles": "{models/**,dataset/**,.venv/**,**/__pycache__/**}"
+      "memory": 3008,
+      "excludeFiles": "{.venv/**,**/__pycache__/**,notebook/**,**/*.db}"
     }
   }
 }

@@ -17,10 +17,15 @@ def resolve_model_dir() -> Path:
         configured = Path(os.getenv("MODEL_DIR"))
         return configured if configured.is_absolute() else PROJECT_ROOT / configured
 
+    bundled = PROJECT_ROOT / "models"
+    yield_file = bundled / os.getenv("YIELD_MODEL_NAME", "model.joblib")
+    if yield_file.exists() and yield_file.stat().st_size >= MIN_MODEL_BYTES:
+        return bundled
+
     if os.getenv("VERCEL") or os.getenv("VERCEL_ENV"):
         return Path("/tmp/cropeazy_models")
 
-    return PROJECT_ROOT / "models"
+    return bundled
 
 
 def model_paths() -> tuple[Path, Path]:
