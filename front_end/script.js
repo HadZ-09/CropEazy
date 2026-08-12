@@ -307,6 +307,22 @@ async function fetchLocationContext(latitude, longitude) {
     status.classList.remove("hidden");
     label.textContent = "Fetching weather and region data...";
 
+    const cacheKey = `${latitude.toFixed(3)},${longitude.toFixed(3)}`;
+    const cachedRaw = sessionStorage.getItem(LOCATION_CACHE_KEY);
+    if (cachedRaw) {
+        try {
+            const cached = JSON.parse(cachedRaw);
+            if (cached.key === cacheKey && cached.data) {
+                locationContext = cached.data;
+                applyLocationContext(cached.data);
+                label.textContent = `${cached.data.city ? `${cached.data.city}, ` : ""}${cached.data.region ? `${cached.data.region}, ` : ""}${cached.data.country}`;
+                return;
+            }
+        } catch {
+            sessionStorage.removeItem(LOCATION_CACHE_KEY);
+        }
+    }
+
     try {
         const response = await fetch(
             `${API_BASE}/location/context?latitude=${latitude}&longitude=${longitude}`
@@ -315,6 +331,10 @@ async function fetchLocationContext(latitude, longitude) {
         if (!response.ok) throw new Error(data.detail || "Location lookup failed.");
 
         locationContext = data;
+        sessionStorage.setItem(
+            LOCATION_CACHE_KEY,
+            JSON.stringify({ key: cacheKey, data })
+        );
         applyLocationContext(data);
         label.textContent = `${data.city ? `${data.city}, ` : ""}${data.region ? `${data.region}, ` : ""}${data.country}`;
     } catch (error) {

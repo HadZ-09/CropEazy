@@ -1,11 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "python -m backend.model_download",
-  "functions": {
-    "main.py": {
-      "maxDuration": 60,
-      "memory": 3008,
-      "excludeFiles": "{.venv/**,**/__pycache__/**,notebook/**,**/*.db}"
-    }
-  }
+  "_comment": "CropEazy is NOT compatible with Vercel serverless. Use Render (render.yaml) or Railway (railway.toml). See DEPLOY.md."
 }

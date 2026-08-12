@@ -1,8 +1,11 @@
 ﻿# CropEazy — Crop Intelligence Platform
 
-Full-stack crop recommendation, yield prediction, pest alerts, OTP login, and profit/loss dashboard. Frontend and API run together on one service.
+Full-stack crop recommendation, yield prediction, pest alerts, OTP login, and profit/loss dashboard.
 
-## Deploy without a credit card
+> **Do not deploy on Vercel** — it will crash (112 MB ML model + sklearn exceeds serverless limits).  
+> **Use [Render](https://render.com)** (already working for you) or **Railway**. See **[DEPLOY.md](DEPLOY.md)** for full details.
+
+## Quick deploy (Render — recommended)
 
 Most cloud hosts (Render, Railway, Fly.io) ask for a card even on free tiers — usually for identity verification, not billing.
 

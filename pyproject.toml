@@ -3,8 +3,5 @@ name = "cropeazy"
 version = "3.0.0"
 requires-python = ">=3.11"
 
-[tool.vercel]
-entrypoint = "main:app"
-
-[tool.vercel.scripts]
-build = "python -m backend.model_download"
+# Vercel is NOT supported for this app (112 MB ML model + sklearn).
+# See DEPLOY.md — use Render or Railway instead.

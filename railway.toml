@@ -3,8 +3,13 @@ builder = "nixpacks"
 buildCommand = "python -m backend.model_download"
 
 [deploy]
-startCommand = "uvicorn backend.main:app --host 0.0.0.0 --port $PORT"
+startCommand = "uvicorn main:app --host 0.0.0.0 --port $PORT"
 healthcheckPath = "/health"
 healthcheckTimeout = 300
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 5
+
+# Set in Railway dashboard Variables:
+#   JWT_SECRET, DATABASE_PATH=/data/cropeazy.db, DEV_MODE=true
+#   SKIP_MODEL_PRELOAD=true  (optional on free tier; false on paid for faster first request)
+# Mount a volume at /data for persistent SQLite.
