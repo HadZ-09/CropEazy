@@ -3,6 +3,16 @@ const API_BASE = window.location.origin.includes("5500") ||
     ? "http://127.0.0.1:8000"
     : window.location.origin;
 
+async function parseJsonResponse(response) {
+    const text = await response.text();
+    try {
+        return text ? JSON.parse(text) : {};
+    } catch {
+        const snippet = text.trim().slice(0, 120) || `HTTP ${response.status}`;
+        throw new Error(snippet);
+    }
+}
+
 const AUTH_TOKEN_KEY = "cropeazy_auth_token";
 const AUTH_USER_KEY = "cropeazy_auth_user";
 const LOCATION_PROMPT_KEY = "cropeazy_location_prompt_seen";
@@ -128,7 +138,7 @@ async function bootstrapAuth() {
             headers: authHeaders(),
         });
         if (!response.ok) throw new Error("Session expired");
-        currentUser = await response.json();
+        currentUser = await parseJsonResponse(response);
         localStorage.setItem(AUTH_USER_KEY, JSON.stringify(currentUser));
         updateAuthUi();
         showPage("page1");
@@ -151,7 +161,7 @@ async function sendOtp() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ phone }),
         });
-        const data = await response.json();
+        const data = await parseJsonResponse(response);
         if (!response.ok) throw new Error(data.detail || "Could not send OTP.");
 
         document.getElementById("login-step-phone").classList.add("hidden");
@@ -187,7 +197,7 @@ async function verifyOtp() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ phone, otp, name }),
         });
-        const data = await response.json();
+        const data = await parseJsonResponse(response);
         if (!response.ok) throw new Error(data.detail || "OTP verification failed.");
 
         localStorage.setItem(AUTH_TOKEN_KEY, data.access_token);
@@ -221,7 +231,7 @@ async function loadYieldOptions() {
     try {
         const response = await fetch(`${API_BASE}/options/yield`);
         if (!response.ok) return;
-        const data = await response.json();
+        const data = await parseJsonResponse(response);
         fillDatalist("area-options", data.areas || []);
         fillDatalist("item-options", data.items || []);
     } catch (error) {
@@ -233,7 +243,7 @@ async function loadCropPrices() {
     try {
         const response = await fetch(`${API_BASE}/options/prices`);
         if (!response.ok) return;
-        const data = await response.json();
+        const data = await parseJsonResponse(response);
         cropPrices = data.prices_inr_per_tonne || {};
     } catch (error) {
         console.warn("Could not load crop prices:", error);
@@ -300,7 +310,7 @@ async function fetchLocationContext(latitude, longitude) {
         const response = await fetch(
             `${API_BASE}/location/context?latitude=${latitude}&longitude=${longitude}`
         );
-        const data = await response.json();
+        const data = await parseJsonResponse(response);
         if (!response.ok) throw new Error(data.detail || "Location lookup failed.");
 
         locationContext = data;
@@ -364,7 +374,7 @@ async function predictCrop() {
             headers: authHeaders({ "Content-Type": "application/json" }),
             body: JSON.stringify(payload),
         });
-        const data = await response.json();
+        const data = await parseJsonResponse(response);
         if (!response.ok) throw new Error(data.detail || "Crop prediction failed.");
 
         lastCropResult = { input: payload, result: data };
@@ -409,7 +419,7 @@ async function predictYield() {
             headers: authHeaders({ "Content-Type": "application/json" }),
             body: JSON.stringify(payload),
         });
-        const data = await response.json();
+        const data = await parseJsonResponse(response);
         if (!response.ok) throw new Error(data.detail || "Yield prediction failed.");
 
         setInputValue("yield-market-price", getNumberValue("yield-market-price") ?? guessCropPrice(payload.Item));
@@ -437,7 +447,7 @@ async function loadPestInsights(crop) {
 
     try {
         const response = await fetch(`${API_BASE}/predict/pests?crop=${encodeURIComponent(crop)}`);
-        const data = await response.json();
+        const data = await parseJsonResponse(response);
         if (!response.ok) throw new Error(data.detail || "Pest prediction failed.");
 
         document.getElementById("pest-season-label").textContent =
@@ -516,7 +526,7 @@ async function enableEmergencyAlerts() {
                 longitude: coords.longitude,
             }),
         });
-        const data = await response.json();
+        const data = await parseJsonResponse(response);
         if (!response.ok) throw new Error(data.detail || "Alert setup failed.");
 
         status.textContent = data.sms_sent
@@ -539,7 +549,7 @@ async function loadAlertHistory() {
         const response = await fetch(`${API_BASE}/alerts/history`, {
             headers: authHeaders(),
         });
-        const data = await response.json();
+        const data = await parseJsonResponse(response);
         if (!response.ok) throw new Error(data.detail);
 
         if (!data.alerts.length) {
@@ -635,7 +645,7 @@ async function calculateProfitSummary(input, result) {
         headers: authHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify(payload),
     });
-    const data = await response.json();
+    const data = await parseJsonResponse(response);
     if (!response.ok) throw new Error(data.detail || "Profit calculation failed.");
     return { payload, profit: data };
 }
@@ -662,7 +672,7 @@ async function saveCurrentResultToDashboard(silent = false) {
                 data_json: { breakdown: profit.breakdown, currency: "INR" },
             }),
         });
-        const data = await response.json();
+        const data = await parseJsonResponse(response);
         if (!response.ok) throw new Error(data.detail || "Could not save record.");
         if (!silent) showPage("page3");
     } catch (error) {
@@ -695,7 +705,7 @@ async function renderDashboard() {
         const response = await fetch(`${API_BASE}/dashboard/records`, {
             headers: authHeaders(),
         });
-        const data = await response.json();
+        const data = await parseJsonResponse(response);
         if (response.ok) records = data.records || [];
     } catch {
         records = [];

@@ -7,7 +7,7 @@ import pandas as pd
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from joblib import load
 from pydantic import BaseModel, Field
 
@@ -67,6 +67,26 @@ CROP_PRICES_INR_PER_TONNE: Dict[str, float] = {
 }
 
 
+def load_yield_options() -> None:
+    global yield_options
+    if yield_options.get("areas") or yield_options.get("items"):
+        return
+    if YIELD_DATASET_PATH.exists():
+        df = pd.read_csv(YIELD_DATASET_PATH)
+        yield_options = {
+            "areas": sorted(df["Area"].dropna().astype(str).unique().tolist()),
+            "items": sorted(df["Item"].dropna().astype(str).unique().tolist()),
+        }
+
+
+def _should_preload_models() -> bool:
+    if os.getenv("SKIP_MODEL_PRELOAD", "").lower() in {"1", "true", "yes"}:
+        return False
+    if os.getenv("RENDER") or os.getenv("VERCEL") or os.getenv("VERCEL_ENV"):
+        return False
+    return True
+
+
 def load_models() -> None:
     global yield_model, crop_model, yield_options
 
@@ -94,13 +114,7 @@ def load_models() -> None:
 
     yield_model = load(yield_path)
     crop_model = load(crop_path)
-
-    if YIELD_DATASET_PATH.exists():
-        df = pd.read_csv(YIELD_DATASET_PATH)
-        yield_options = {
-            "areas": sorted(df["Area"].dropna().astype(str).unique().tolist()),
-            "items": sorted(df["Item"].dropna().astype(str).unique().tolist()),
-        }
+    load_yield_options()
 
 
 def ensure_models_loaded() -> None:
@@ -113,13 +127,17 @@ def ensure_models_loaded() -> None:
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     init_db()
-    try:
-        load_models()
-        yield_path, crop_path = current_model_paths()
-        print(f"Loaded yield model from {yield_path}")
-        print(f"Loaded crop model from {crop_path}")
-    except Exception as exc:
-        print(f"Model preload skipped: {exc}")
+    load_yield_options()
+    if _should_preload_models():
+        try:
+            load_models()
+            yield_path, crop_path = current_model_paths()
+            print(f"Loaded yield model from {yield_path}")
+            print(f"Loaded crop model from {crop_path}")
+        except Exception as exc:
+            print(f"Model preload skipped: {exc}")
+    else:
+        print("Model preload disabled for this host (lazy load on first prediction).")
     yield
 
 
@@ -275,6 +293,7 @@ def auth_me(user: Dict[str, Any] = Depends(get_current_user)) -> Dict[str, Any]:
 
 @app.get("/options/yield")
 def get_yield_options() -> Dict[str, List[str]]:
+    load_yield_options()
     return yield_options
 
 
@@ -463,5 +482,16 @@ def predict_yield(payload: YieldPredictionRequest) -> YieldPredictionResponse:
         raise HTTPException(status_code=500, detail=f"Yield prediction failed: {exc}") from exc
 
 
-if FRONTEND_DIR.exists():
-    app.mount("/", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="frontend")
+@app.get("/", include_in_schema=False)
+def serve_index() -> FileResponse:
+    return FileResponse(FRONTEND_DIR / "index.html")
+
+
+@app.get("/style.css", include_in_schema=False)
+def serve_style() -> FileResponse:
+    return FileResponse(FRONTEND_DIR / "style.css")
+
+
+@app.get("/script.js", include_in_schema=False)
+def serve_script() -> FileResponse:
+    return FileResponse(FRONTEND_DIR / "script.js")
