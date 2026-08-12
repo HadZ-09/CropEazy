@@ -1,9 +1,12 @@
-# Render Blueprint — https://render.com/docs/blueprint-spec
+# Render Blueprint — free tier (no persistent disk)
+# Note: Render may still ask for a card for identity verification on some accounts,
+# but the free web service itself costs $0. Use Koyeb or Cloudflare Tunnel if you
+# want to avoid entering card details entirely.
 services:
   - type: web
     name: cropeazy
     runtime: python
-    plan: starter
+    plan: free
     region: singapore
     buildCommand: pip install -r requirements.txt && python -m backend.model_download
     startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
@@ -16,8 +19,4 @@ services:
       - key: DEV_MODE
         value: "true"
       - key: DATABASE_PATH
-        value: /var/data/cropeazy.db
-    disk:
-      name: cropeazy-data
-      mountPath: /var/data
-      sizeGB: 1
+        value: /tmp/cropeazy.db

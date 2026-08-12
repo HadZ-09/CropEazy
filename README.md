@@ -2,12 +2,50 @@
 
 Full-stack crop recommendation, yield prediction, pest alerts, OTP login, and profit/loss dashboard. Frontend and API run together on one service.
 
-## Deploy on Render (recommended alternative to Vercel)
+## Deploy without a credit card
+
+Most cloud hosts (Render, Railway, Fly.io) ask for a card even on free tiers — usually for identity verification, not billing.
+
+### Option A — Cloudflare Tunnel (free, no card, uses your PC)
+
+Your app already runs locally. Expose it with a public HTTPS URL:
+
+```powershell
+# Terminal 1 — run the app
+python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
+
+# Terminal 2 — install cloudflared once (no account needed for quick tunnels)
+winget install Cloudflare.cloudflared
+
+# Then expose (or run scripts\expose-local.bat)
+cloudflared tunnel --url http://127.0.0.1:8000
+```
+
+Copy the `https://….trycloudflare.com` URL and share it. Your PC must stay on while others use the app.
+
+### Option B — Koyeb free tier (no card for many accounts)
+
+1. Go to [koyeb.com](https://www.koyeb.com) → sign up with GitHub (no card on free Starter).
+2. **Create Web Service** → GitHub → **HadZ-09/CropEazy**.
+3. Build: `pip install -r requirements.txt && python -m backend.model_download`
+4. Run: `uvicorn backend.main:app --host 0.0.0.0 --port $PORT`
+5. Instance type: **Free** (512 MB RAM — first load may be slow).
+6. Env: `JWT_SECRET`, `DEV_MODE=true`, `DATABASE_PATH=/tmp/cropeazy.db`
+
+Free tier sleeps after ~1 hour idle; first visit wakes it (cold start ~30s).
+
+### Option C — Render free (card may be asked for verification only)
+
+We switched `render.yaml` to **`plan: free`** (no paid disk). Render sometimes still asks for a card to verify identity — you are not charged on the free plan unless you upgrade.
+
+---
+
+## Deploy on Render
 
 1. Go to [render.com](https://render.com) and sign in with GitHub.
 2. **New** → **Blueprint** → connect repo **HadZ-09/CropEazy**.
-3. Render reads `render.yaml` automatically (downloads models at build, starts uvicorn, `/health` check).
-4. Use at least the **Starter** plan (512MB+ RAM needed for sklearn + 108MB model).
+3. Render reads `render.yaml` (free plan, models downloaded at build).
+4. Free plan has **512 MB RAM** — first request may be slow while the model loads.
 5. After deploy, open your `*.onrender.com` URL.
 
 Verify: `https://YOUR-APP.onrender.com/health` → `yield_model_loaded: true`.
