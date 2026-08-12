@@ -123,7 +123,7 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(
     title="CropEazy Intelligence API",
-    description="Crop recommendation, yield prediction, pest alerts, and farmer dashboard.",
+    # description="Crop recommendation, yield prediction, pest alerts, and farmer dashboard.",
     version="3.0.0",
     lifespan=lifespan,
 )
