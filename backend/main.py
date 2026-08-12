@@ -11,7 +11,7 @@ from fastapi.staticfiles import StaticFiles
 from joblib import load
 from pydantic import BaseModel, Field
 
-# from backend.alert_service import check_and_notify_user
+from backend.alert_service import check_and_notify_user
 from backend.auth import get_current_user, send_login_otp, verify_login_otp
 from backend.database import (
     add_dashboard_record,
@@ -22,7 +22,7 @@ from backend.database import (
     upsert_alert_subscription,
 )
 from backend.location_service import get_location_context
-from backend.model_download import ensure_model_files
+from backend.model_download import ensure_model_files, model_paths
 from backend.pest_data import get_pest_prediction
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -31,12 +31,7 @@ load_dotenv(PROJECT_ROOT / ".env")
 if os.getenv("VERCEL") or os.getenv("VERCEL_ENV"):
     os.environ.setdefault("PROJECT_ROOT", str(PROJECT_ROOT))
 
-YIELD_MODEL_PATH = PROJECT_ROOT / os.getenv("MODEL_DIR", "models") / os.getenv(
-    "YIELD_MODEL_NAME", "model.joblib"
-)
-CROP_MODEL_PATH = PROJECT_ROOT / os.getenv("MODEL_DIR", "models") / os.getenv(
-    "CROP_MODEL_NAME", "crop_recommendation_model.pkl"
-)
+YIELD_MODEL_PATH, CROP_MODEL_PATH = model_paths()
 YIELD_DATASET_PATH = PROJECT_ROOT / os.getenv("DATASET_DIR", "dataset") / os.getenv(
     "YIELD_DATASET", "yield_df.csv"
 )

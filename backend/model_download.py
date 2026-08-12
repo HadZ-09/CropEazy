@@ -5,14 +5,29 @@ import urllib.request
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-MODEL_DIR = PROJECT_ROOT / os.getenv("MODEL_DIR", "models")
-YIELD_MODEL_PATH = MODEL_DIR / os.getenv("YIELD_MODEL_NAME", "model.joblib")
-CROP_MODEL_PATH = MODEL_DIR / os.getenv("CROP_MODEL_NAME", "crop_recommendation_model.pkl")
+MIN_MODEL_BYTES = 1000
 
 GITHUB_OWNER = os.getenv("GITHUB_REPO_OWNER", "HadZ-09")
 GITHUB_REPO = os.getenv("GITHUB_REPO_NAME", "CropEazy")
 GITHUB_BRANCH = os.getenv("GITHUB_BRANCH", "main")
-MIN_MODEL_BYTES = 1000
+
+
+def resolve_model_dir() -> Path:
+    if os.getenv("MODEL_DIR"):
+        configured = Path(os.getenv("MODEL_DIR"))
+        return configured if configured.is_absolute() else PROJECT_ROOT / configured
+
+    if os.getenv("VERCEL") or os.getenv("VERCEL_ENV"):
+        return Path("/tmp/cropeazy_models")
+
+    return PROJECT_ROOT / "models"
+
+
+def model_paths() -> tuple[Path, Path]:
+    model_dir = resolve_model_dir()
+    yield_path = model_dir / os.getenv("YIELD_MODEL_NAME", "model.joblib")
+    crop_path = model_dir / os.getenv("CROP_MODEL_NAME", "crop_recommendation_model.pkl")
+    return yield_path, crop_path
 
 
 def _media_url(relative_path: str) -> str:
@@ -51,10 +66,10 @@ def _download(url: str, dest: Path) -> None:
 
 
 def ensure_model_files() -> None:
-    model_rel = MODEL_DIR.relative_to(PROJECT_ROOT).as_posix()
+    yield_path, crop_path = model_paths()
     targets = [
-        (YIELD_MODEL_PATH, f"{model_rel}/{YIELD_MODEL_PATH.name}"),
-        (CROP_MODEL_PATH, f"{model_rel}/{CROP_MODEL_PATH.name}"),
+        (yield_path, f"models/{yield_path.name}"),
+        (crop_path, f"models/{crop_path.name}"),
     ]
 
     for dest, rel_path in targets:
